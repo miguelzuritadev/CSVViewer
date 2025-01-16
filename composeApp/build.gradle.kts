@@ -25,8 +25,9 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-            //now implement common-csv here
+
             implementation(libs.apache.commons.csv)
+            implementation(libs.junit)
 
         }
     }

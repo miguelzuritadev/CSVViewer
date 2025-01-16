@@ -12,11 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.AwtWindow
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVParser
 import java.awt.FileDialog
 import java.awt.Frame
-import java.io.BufferedReader
+import java.io.File
 
 @Composable
 @Preview
@@ -27,36 +25,28 @@ fun App() {
             Button(onClick = {
                 showContent = !showContent
             }) {
-                Text("Click me!")
-
+                Text("Abrir archivo CSV")
             }
             AnimatedVisibility(showContent) {
-                /*val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }*/
-
-                FileDialog(null) {
-                    println("Selected file: $it")
-                    val fileContent = it?.let { file -> java.io.File(file).readText() }
+                FileDialog(null) { filePath ->
+                    println("Selected file: $filePath")
+                    val fileContent = filePath?.let { file -> File(file).readText() }
                     println("File content: $fileContent")
 
-                    val bufferedReader = BufferedReader(java.io.FileReader(it))
-                    val csvParser = CSVParser(bufferedReader, CSVFormat.DEFAULT);
-                    for (csvRecord in csvParser) {
-                        val studentId = csvRecord.get(0);
-                        val studentName = csvRecord.get(1);
-                        val studentLastName = csvRecord.get(2);
-                        var studentScore = csvRecord.get(3);
-                        println(Student(studentId, studentName, studentLastName, studentScore))
+                    filePath?.let {
+                        val logCSVParser = LogCSVParser(it)
+                        logCSVParser.parse().forEach { row ->
+                            println(row)
+                        }
                     }
+
 
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun FileDialog(parent: Frame? = null, onCloseRequest: (result: String?) -> Unit) = AwtWindow(
