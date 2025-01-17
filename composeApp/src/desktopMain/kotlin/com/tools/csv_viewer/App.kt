@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -90,7 +91,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 }
 
                 Row {
-                    Column(modifier = Modifier.weight(0.7f)) {
+                    Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.5f)) {
                         CsvDataGrid(records.filter { it.idTracking.contains(filterText, ignoreCase = true) }) { record ->
                             requestJSON = record.bodyRequest
                             responseJSON = record.bodyResponse
