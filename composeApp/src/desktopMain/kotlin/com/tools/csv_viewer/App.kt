@@ -4,6 +4,8 @@ import CsvRecord
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.onFocusedBoundsChanged
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -23,7 +26,21 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
 import com.sebastianneubauer.jsontree.JsonTree
@@ -32,7 +49,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
-import javax.swing.JOptionPane
 
 
 private val DarkColorPalette = darkColors(
@@ -67,7 +83,9 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
         var responseJSON by remember { mutableStateOf("") }
 
         Scaffold {
-            Column(Modifier.fillMaxSize().background(colors.background), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                Modifier.fillMaxSize().background(colors.background), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Button(onClick = {
                     showContent = !showContent
                 }) {
@@ -75,16 +93,16 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 }
                 AnimatedVisibility(showContent) {
                     FileDialog(null) { filePath ->
-                        println("Selected file: $filePath")
+//                        println("Selected file: $filePath")
                         val fileContent = filePath?.let { file -> File(file).readText() }
-                        println("File content: $fileContent")
+//                        println("File content: $fileContent")
 
                         filePath?.let {
                             val logCSVParser = LogCSVParser(it)
                             val csvRecords = logCSVParser.parse()
-                            csvRecords.forEach { row ->
+                            /*csvRecords.forEach { row ->
                                 println(row)
-                            }
+                            }*/
                             records = csvRecords
                         }
                     }
@@ -128,7 +146,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                             json = requestJSON,
                             onLoading = { Text(text = "Loading...") },
                             onError = { throwable: Throwable ->
-                                println("Error: ${throwable.message}")
+//                                println("Error: ${throwable.message}")
                             }
                         )
                     }
@@ -138,7 +156,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                             json = responseJSON,
                             onLoading = { Text(text = "Loading...") },
                             onError = { throwable: Throwable ->
-                                println("Error: ${throwable.message}")
+//                                println("Error: ${throwable.message}")
                             }
                         )
                     }
@@ -162,14 +180,47 @@ fun CsvHeaderRow() {
 }
 
 @Composable
-fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable {
+fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusManager: FocusManager = LocalFocusManager.current) {
+    val focusRequester = remember { FocusRequester() }
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)
+        .clickable {
+            focusRequester.requestFocus()
+            onClick(record)
+        }
+        .focusRequester(focusRequester)
+        .focusable()
+        .onFocusChanged {
+            println("onFocusChanged => it.isFocused: ${it.isFocused}")
+            if (it.isFocused) {
                 onClick(record)
             }
+        }
+        .onKeyEvent { keyEvent ->
+//            println("keyEvent.type: ${keyEvent.type}")
+            if (keyEvent.type == KeyEventType.KeyDown) {
+                when (keyEvent.key) {
+                    Key.DirectionDown -> {
+                        println("==Key.DirectionDown==")
+                        focusManager.moveFocus(FocusDirection.Down)
+//                        val nextFocusedView = focusManager.focusedItem
+//                        println("Next focused view: $nextFocusedView")
+                        true
+                    }
+
+                    Key.DirectionUp -> {
+                        println("==Key.DirectionUp==")
+                        focusManager.moveFocus(FocusDirection.Up)
+                        true
+                    }
+
+                    else -> false
+                }
+            } else {
+                false
+            }
+        }
     ) {
         Text(record.dateRequest, Modifier.weight(1f))
         Text(record.dateResponse, Modifier.weight(1f))
@@ -183,7 +234,7 @@ fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}) {
 
 @Composable
 fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
-    LazyColumn {
+    LazyColumn(modifier = Modifier.focusGroup()) {
         item {
             CsvHeaderRow()
         }
