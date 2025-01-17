@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
+import com.sebastianneubauer.jsontree.JsonTree
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import java.awt.FileDialog
@@ -32,6 +33,8 @@ fun App() {
         var showContent by remember { mutableStateOf(false) }
         var records by remember { mutableStateOf(emptyList<CsvRecord>()) }
         var filterText by remember { mutableStateOf("") }
+        var requestJSON by remember { mutableStateOf("") }
+        var responseJSON by remember { mutableStateOf("") }
 
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Button(onClick = {
@@ -60,7 +63,22 @@ fun App() {
 
             Row {
                 Column(modifier = Modifier.weight(0.7f)) {
-                    CsvDataGrid(records.filter { it.idTracking.contains(filterText, ignoreCase = true) })
+                    CsvDataGrid(records.filter { it.idTracking.contains(filterText, ignoreCase = true) }) { record ->
+                        requestJSON = record.bodyRequest
+                        responseJSON = record.bodyResponse
+
+                        // Show alert with the record details
+                        val message = """
+                                Date Request: ${record.dateRequest}
+                                Date Response: ${record.dateResponse}
+                                Body Request: ${record.bodyRequest}
+                                Body Response: ${record.bodyResponse}
+                                Enterprise Code: ${record.enterpriseCode}
+                                Platform: ${record.platform}
+                                ID Tracking: ${record.idTracking}
+                            """.trimIndent()
+//                        JOptionPane.showMessageDialog(null, message, "Record Details", JOptionPane.INFORMATION_MESSAGE)
+                    }
                 }
 
                 Column(modifier = Modifier.weight(0.3f)) {
@@ -74,12 +92,28 @@ fun App() {
 
             }
 
-            /*JsonTree(
-                json = "{ \"key\": \"value\" }",
-                onLoading = { Text(text = "Loading...") }
-            )*/
-
-
+            Row {
+                Column(modifier = Modifier.weight(0.7f)) {
+                    Text("Request JSON")
+                    JsonTree(
+                        json = requestJSON,
+                        onLoading = { Text(text = "Loading...") },
+                        onError = { throwable: Throwable ->
+                            println("Error: ${throwable.message}")
+                        }
+                    )
+                }
+                Column(modifier = Modifier.weight(0.3f)) {
+                    Text("Response JSON")
+                    JsonTree(
+                        json = responseJSON,
+                        onLoading = { Text(text = "Loading...") },
+                        onError = { throwable: Throwable ->
+                            println("Error: ${throwable.message}")
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -98,23 +132,13 @@ fun CsvHeaderRow() {
 }
 
 @Composable
-fun CsvRecordRow(record: CsvRecord) {
+fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}) {
     Row(
         Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                // Show alert with the record details
-                val message = """
-                Date Request: ${record.dateRequest}
-                Date Response: ${record.dateResponse}
-                Body Request: ${record.bodyRequest}
-                Body Response: ${record.bodyResponse}
-                Enterprise Code: ${record.enterpriseCode}
-                Platform: ${record.platform}
-                ID Tracking: ${record.idTracking}
-            """.trimIndent()
-                JOptionPane.showMessageDialog(null, message, "Record Details", JOptionPane.INFORMATION_MESSAGE)
+                onClick(record)
             }
     ) {
         Text(record.dateRequest, Modifier.weight(1f))
@@ -128,13 +152,13 @@ fun CsvRecordRow(record: CsvRecord) {
 }
 
 @Composable
-fun CsvDataGrid(records: List<CsvRecord>) {
+fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
     LazyColumn {
         item {
             CsvHeaderRow()
         }
         items(records) { record ->
-            CsvRecordRow(record)
+            CsvRecordRow(record, onClick)
         }
     }
 }

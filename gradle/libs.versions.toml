@@ -5,6 +5,7 @@ junit = "4.13.2"
 kotlin = "2.1.0"
 kotlinx-coroutines = "1.10.1"
 commons = "1.5"
+json-tree = "2.4.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -14,8 +15,9 @@ androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", nam
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 
-#implementation 'org.apache.commons:commons-csv:1.5'
 apache-commons-csv = { group = "org.apache.commons", name = "commons-csv", version.ref = "commons" }
+
+json-tree = { group = "com.sebastianneubauer.jsontree", name = "jsontree", version.ref = "json-tree" }
 
 
 [plugins]

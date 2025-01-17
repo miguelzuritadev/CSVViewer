@@ -29,6 +29,8 @@ kotlin {
             implementation(libs.apache.commons.csv)
             implementation(libs.junit)
 
+            implementation(libs.json.tree)
+
         }
     }
 }
