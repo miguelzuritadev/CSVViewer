@@ -6,6 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.onFocusedBoundsChanged
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -44,6 +49,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
 import com.sebastianneubauer.jsontree.JsonTree
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import java.awt.FileDialog
@@ -234,10 +240,21 @@ fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusMana
 
 @Composable
 fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
-    LazyColumn(modifier = Modifier.focusGroup()) {
-        item {
-            CsvHeaderRow()
-        }
+    val scrollState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    CsvHeaderRow()
+    LazyColumn(
+        state = scrollState,
+        modifier = Modifier.focusGroup().draggable(
+            orientation = Orientation.Vertical,
+            state = rememberDraggableState { delta ->
+                coroutineScope.launch {
+                    scrollState.scrollBy(-delta)
+                }
+            },
+        )
+    ) {
         items(records) { record ->
             CsvRecordRow(record, onClick)
         }
