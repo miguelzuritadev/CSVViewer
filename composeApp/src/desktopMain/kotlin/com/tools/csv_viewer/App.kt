@@ -109,7 +109,11 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 
                 Row {
                     Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.5f)) {
-                        CsvDataGrid(records.filter { it.idTracking.contains(filterText, ignoreCase = true) }) { record ->
+                        CsvDataGrid(records.filter {
+                            it.idTracking.contains(filterText, ignoreCase = true) ||
+                                    it.bodyResponse.contains(filterText, ignoreCase = true) ||
+                                    it.bodyRequest.contains(filterText, ignoreCase = true)
+                        }) { record ->
                             currentItem = record
                         }
                     }
