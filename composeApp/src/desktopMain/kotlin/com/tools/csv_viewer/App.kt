@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -17,8 +16,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -50,7 +50,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import java.awt.FileDialog
 import java.awt.Frame
-import java.io.File
 
 
 private val DarkColorPalette = darkColors(
@@ -81,8 +80,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
         var showContent by remember { mutableStateOf(false) }
         var records by remember { mutableStateOf(emptyList<CsvRecord>()) }
         var filterText by remember { mutableStateOf("") }
-        var requestJSON by remember { mutableStateOf("") }
-        var responseJSON by remember { mutableStateOf("") }
+        var currentItem: CsvRecord by remember { mutableStateOf(CsvRecord("", "", "", "", "", "", "")) }
 
         Scaffold {
             LaunchedEffect(Unit) {
@@ -112,8 +110,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 Row {
                     Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.5f)) {
                         CsvDataGrid(records.filter { it.idTracking.contains(filterText, ignoreCase = true) }) { record ->
-                            requestJSON = record.bodyRequest
-                            responseJSON = record.bodyResponse
+                            currentItem = record
                         }
                     }
 
@@ -129,9 +126,9 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 
                 Row {
                     Column(modifier = Modifier.weight(0.7f)) {
-                        Text("Request JSON")
+                        Text("Request JSON [${currentItem.dateRequest}]")
                         JsonTree(
-                            json = requestJSON,
+                            json = currentItem.bodyRequest,
                             onLoading = { Text(text = "Loading...") },
                             onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
@@ -139,9 +136,9 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         )
                     }
                     Column(modifier = Modifier.weight(0.3f)) {
-                        Text("Response JSON")
+                        Text("Response JSON [${currentItem.dateResponse}]")
                         JsonTree(
-                            json = responseJSON,
+                            json = currentItem.bodyResponse,
                             onLoading = { Text(text = "Loading...") },
                             onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
@@ -157,6 +154,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 @Composable
 fun CsvHeaderRow() {
     Row(Modifier.fillMaxWidth().padding(8.dp)) {
+        Text("#", Modifier.width(30.dp))
         Text("Date Request", Modifier.weight(1f))
         Text("Date Response", Modifier.weight(1f))
         Text("Body Request", Modifier.weight(1f))
@@ -168,7 +166,7 @@ fun CsvHeaderRow() {
 }
 
 @Composable
-fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusManager: FocusManager) {
+fun CsvRecordRow(index: Int, record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusManager: FocusManager) {
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
 
@@ -202,6 +200,7 @@ fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusMana
             }
         }
     ) {
+        Text(index.toString(), Modifier.width(30.dp))
         Text(record.dateRequest, Modifier.weight(1f))
         Text(record.dateResponse, Modifier.weight(1f))
         Text(record.bodyRequest, Modifier.weight(1f))
@@ -230,8 +229,8 @@ fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
             },
         )
     ) {
-        items(records) { record ->
-            CsvRecordRow(record, onClick, focusManager)
+        itemsIndexed(records) { index, record ->
+            CsvRecordRow(index.plus(1), record, onClick, focusManager)
         }
     }
 }
