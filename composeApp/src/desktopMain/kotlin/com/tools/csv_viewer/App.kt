@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.onFocusedBoundsChanged
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -35,16 +34,13 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
@@ -89,6 +85,12 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
         var responseJSON by remember { mutableStateOf("") }
 
         Scaffold {
+            LaunchedEffect(Unit) {
+                println("==LaunchedEffect==")
+
+                val logCSVParser = LogCSVParser("C:\\projects\\kmp\\CSVViewer\\logs.csv")
+                records = logCSVParser.parse()
+            }
             Column(
                 Modifier.fillMaxSize().background(colors.background), horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -99,17 +101,10 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 }
                 AnimatedVisibility(showContent) {
                     FileDialog(null) { filePath ->
-//                        println("Selected file: $filePath")
-                        val fileContent = filePath?.let { file -> File(file).readText() }
-//                        println("File content: $fileContent")
-
+                        println("filePath: $filePath")
                         filePath?.let {
                             val logCSVParser = LogCSVParser(it)
-                            val csvRecords = logCSVParser.parse()
-                            /*csvRecords.forEach { row ->
-                                println(row)
-                            }*/
-                            records = csvRecords
+                            records = logCSVParser.parse()
                         }
                     }
                 }
@@ -119,18 +114,6 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         CsvDataGrid(records.filter { it.idTracking.contains(filterText, ignoreCase = true) }) { record ->
                             requestJSON = record.bodyRequest
                             responseJSON = record.bodyResponse
-
-                            // Show alert with the record details
-                            val message = """
-                                Date Request: ${record.dateRequest}
-                                Date Response: ${record.dateResponse}
-                                Body Request: ${record.bodyRequest}
-                                Body Response: ${record.bodyResponse}
-                                Enterprise Code: ${record.enterpriseCode}
-                                Platform: ${record.platform}
-                                ID Tracking: ${record.idTracking}
-                            """.trimIndent()
-//                        JOptionPane.showMessageDialog(null, message, "Record Details", JOptionPane.INFORMATION_MESSAGE)
                         }
                     }
 
@@ -142,7 +125,6 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                             modifier = Modifier.fillMaxWidth().padding(8.dp)
                         )
                     }
-
                 }
 
                 Row {
