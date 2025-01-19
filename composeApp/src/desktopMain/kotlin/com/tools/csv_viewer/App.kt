@@ -168,45 +168,37 @@ fun CsvHeaderRow() {
 }
 
 @Composable
-fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusManager: FocusManager = LocalFocusManager.current) {
+fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusManager: FocusManager) {
     val focusRequester = remember { FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(8.dp)
+        .focusRequester(focusRequester)
+        .onFocusChanged { state ->
+            println("onFocusChanged => it.isFocused: ${state.isFocused}")
+            isFocused = state.isFocused
+            if (state.isFocused) {
+                onClick(record)
+            }
+        }
+        .background(if (isFocused) Color.Gray else Color.Transparent)
         .clickable {
             focusRequester.requestFocus()
             onClick(record)
         }
-        .focusRequester(focusRequester)
-        .focusable()
-        .onFocusChanged {
-            println("onFocusChanged => it.isFocused: ${it.isFocused}")
-            if (it.isFocused) {
-                onClick(record)
-            }
-        }
-        .onKeyEvent { keyEvent ->
-//            println("keyEvent.type: ${keyEvent.type}")
-            if (keyEvent.type == KeyEventType.KeyDown) {
-                when (keyEvent.key) {
-                    Key.DirectionDown -> {
-                        println("==Key.DirectionDown==")
-                        focusManager.moveFocus(FocusDirection.Down)
-//                        val nextFocusedView = focusManager.focusedItem
-//                        println("Next focused view: $nextFocusedView")
-                        true
-                    }
-
-                    Key.DirectionUp -> {
-                        println("==Key.DirectionUp==")
-                        focusManager.moveFocus(FocusDirection.Up)
-                        true
-                    }
-
-                    else -> false
+        .onKeyEvent { event ->
+            when {
+                event.type == KeyEventType.KeyDown && event.key == Key.DirectionUp -> {
+                    focusManager.moveFocus(FocusDirection.Up)
                 }
-            } else {
-                false
+
+                event.type == KeyEventType.KeyDown && event.key == Key.DirectionDown -> {
+                    focusManager.moveFocus(FocusDirection.Down)
+                }
+
+                else -> false
             }
         }
     ) {
@@ -224,6 +216,7 @@ fun CsvRecordRow(record: CsvRecord, onClick: (CsvRecord) -> Unit = {}, focusMana
 fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
     val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val focusManager: FocusManager = LocalFocusManager.current
 
     CsvHeaderRow()
     LazyColumn(
@@ -238,7 +231,7 @@ fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
         )
     ) {
         items(records) { record ->
-            CsvRecordRow(record, onClick)
+            CsvRecordRow(record, onClick, focusManager)
         }
     }
 }
