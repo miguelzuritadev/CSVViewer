@@ -130,6 +130,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                     }
                 }
 
+                val focusManager = LocalFocusManager.current
                 Row {
                     Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.3f)) {
                         CsvDataGrid(records.filter {
@@ -138,7 +139,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                                     (it.idTracking.contains(filterText, ignoreCase = true) ||
                                             it.bodyResponse.contains(filterText, ignoreCase = true) ||
                                             it.bodyRequest.contains(filterText, ignoreCase = true))
-                        }) { record ->
+                        }, focusManager) { record ->
                             currentItem = record
                         }
                     }
@@ -168,6 +169,8 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                                 filterOptions.forEach { option ->
                                     DropdownMenuItem(onClick = {
                                         selectedFilter = option
+                                        focusManager.moveFocus(FocusDirection.Up)
+                                        focusManager.moveFocus(FocusDirection.Left)
                                         platformExpanded = false
                                     }) {
                                         Text(option)
@@ -192,6 +195,9 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                                 filterURLOptions.forEach { option ->
                                     DropdownMenuItem(onClick = {
                                         selectedURLFilter = option
+                                        focusManager.moveFocus(FocusDirection.Up)
+                                        focusManager.moveFocus(FocusDirection.Up)
+                                        focusManager.moveFocus(FocusDirection.Left)
                                         urlExpanded = false
                                     }) {
                                         Text(option)
@@ -309,10 +315,9 @@ fun CsvRecordRow(index: Int, record: CsvRecord, onClick: (CsvRecord) -> Unit = {
 }
 
 @Composable
-fun CsvDataGrid(records: List<CsvRecord>, onClick: (CsvRecord) -> Unit = {}) {
+fun CsvDataGrid(records: List<CsvRecord>, focusManager: FocusManager, onClick: (CsvRecord) -> Unit = {}) {
     val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val focusManager: FocusManager = LocalFocusManager.current
 
     CsvHeaderRow()
     LazyColumn(
