@@ -5,5 +5,6 @@ data class CsvRecord(
     val bodyResponse: String,
     val enterpriseCode: String,
     val platform: String,
-    val idTracking: String
+    val idTracking: String,
+    val url: String
 )

@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -53,6 +55,7 @@ import csvviewer.composeapp.generated.resources.Res
 import csvviewer.composeapp.generated.resources.compose_multiplatform
 import csvviewer.composeapp.generated.resources.ic_android_logo
 import csvviewer.composeapp.generated.resources.ic_apple_logo
+import csvviewer.composeapp.generated.resources.ic_arrow_drop_down
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -85,11 +88,18 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
         LightColorPalette
     }
 
+    val filterOptions = listOf("All", "android", "ios", "web")
+    var selectedFilter by remember { mutableStateOf("All") }
+
+    var filterURLOptions = arrayListOf("All")
+    var selectedURLFilter by remember { mutableStateOf("All") }
+
+
     MaterialTheme(colors = colors) {
         var showContent by remember { mutableStateOf(false) }
         var records by remember { mutableStateOf(emptyList<CsvRecord>()) }
         var filterText by remember { mutableStateOf("") }
-        var currentItem: CsvRecord by remember { mutableStateOf(CsvRecord("", "", "", "", "", "", "")) }
+        var currentItem: CsvRecord by remember { mutableStateOf(CsvRecord("", "", "", "", "", "", "", "")) }
 
         Scaffold {
             LaunchedEffect(Unit) {
@@ -97,6 +107,8 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 
                 val logCSVParser = LogCSVParser("C:\\projects\\kmp\\CSVViewer\\logs.csv")
                 records = logCSVParser.parse()
+                // Update URL filter options
+                filterURLOptions = records.map { it.url }.distinct().toCollection(arrayListOf("All"))
             }
             Column(
                 Modifier.fillMaxSize().background(colors.background), horizontalAlignment = Alignment.CenterHorizontally
@@ -109,9 +121,11 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 AnimatedVisibility(showContent) {
                     FileDialog(null) { filePath ->
                         println("filePath: $filePath")
-                        filePath?.let {
-                            val logCSVParser = LogCSVParser(it)
+                        filePath?.let { path ->
+                            val logCSVParser = LogCSVParser(path)
                             records = logCSVParser.parse()
+                            // Update URL filter options
+                            filterURLOptions = records.map { it.url }.distinct().toCollection(arrayListOf("All"))
                         }
                     }
                 }
@@ -119,9 +133,11 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 Row {
                     Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.3f)) {
                         CsvDataGrid(records.filter {
-                            it.idTracking.contains(filterText, ignoreCase = true) ||
-                                    it.bodyResponse.contains(filterText, ignoreCase = true) ||
-                                    it.bodyRequest.contains(filterText, ignoreCase = true)
+                            (selectedFilter == "All" || it.platform == selectedFilter) &&
+                            (selectedURLFilter == "All" || it.url.contains(selectedURLFilter, ignoreCase = true) ) &&
+                                    (it.idTracking.contains(filterText, ignoreCase = true) ||
+                                            it.bodyResponse.contains(filterText, ignoreCase = true) ||
+                                            it.bodyRequest.contains(filterText, ignoreCase = true))
                         }) { record ->
                             currentItem = record
                         }
@@ -134,6 +150,55 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                             label = { Text("Filter by ID Tracking") },
                             modifier = Modifier.fillMaxWidth().padding(8.dp)
                         )
+
+
+                        var platformExpanded by remember { mutableStateOf(false) }
+                        Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                            Button(onClick = { platformExpanded = true }) {
+                                Text(selectedFilter)
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_arrow_drop_down),
+                                    contentDescription = "Dropdown Arrow"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = platformExpanded,
+                                onDismissRequest = { platformExpanded = false }
+                            ) {
+                                filterOptions.forEach { option ->
+                                    DropdownMenuItem(onClick = {
+                                        selectedFilter = option
+                                        platformExpanded = false
+                                    }) {
+                                        Text(option)
+                                    }
+                                }
+                            }
+                        }
+
+                        var urlExpanded by remember { mutableStateOf(false) }
+                        Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                            Button(onClick = { urlExpanded = true }) {
+                                Text(selectedURLFilter)
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_arrow_drop_down),
+                                    contentDescription = "Dropdown Arrow"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = urlExpanded,
+                                onDismissRequest = { urlExpanded = false }
+                            ) {
+                                filterURLOptions.forEach { option ->
+                                    DropdownMenuItem(onClick = {
+                                        selectedURLFilter = option
+                                        urlExpanded = false
+                                    }) {
+                                        Text(option)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -143,7 +208,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         JsonTree(
                             json = currentItem.bodyRequest,
                             initialState = TreeState.EXPANDED,
-                            onLoading = { Text(text = "Loading...") },
+                            onLoading = { },
                             onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
                             }
@@ -154,7 +219,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         JsonTree(
                             json = currentItem.bodyResponse,
                             initialState = TreeState.EXPANDED,
-                            onLoading = { Text(text = "Loading...") },
+                            onLoading = { },
                             onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
                             }
@@ -177,6 +242,7 @@ fun CsvHeaderRow() {
         Text("Enterprise Code", Modifier.weight(1f))
         Text("OS", Modifier.width(50.dp))
         Text("ID Tracking", Modifier.weight(1f))
+        Text("URL", Modifier.weight(1f))
     }
 }
 
@@ -238,6 +304,7 @@ fun CsvRecordRow(index: Int, record: CsvRecord, onClick: (CsvRecord) -> Unit = {
         }
 
         Text(record.idTracking, Modifier.weight(1f))
+        Text(record.url, Modifier.weight(1f))
     }
 }
 

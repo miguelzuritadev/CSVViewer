@@ -21,7 +21,8 @@ class LogCSVParser(filePath: String) {
                     csvRecord.get(3),
                     csvRecord.get(4),
                     csvRecord.get(5),
-                    csvRecord.get(6)
+                    csvRecord.get(6),
+                    csvRecord.get(7)
                 )
                 records.add(row)
             } catch (e: IndexOutOfBoundsException) {
