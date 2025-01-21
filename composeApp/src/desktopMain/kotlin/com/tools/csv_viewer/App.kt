@@ -10,17 +10,20 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -45,7 +48,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
 import com.sebastianneubauer.jsontree.JsonTree
+import com.sebastianneubauer.jsontree.TreeState
+import csvviewer.composeapp.generated.resources.Res
+import csvviewer.composeapp.generated.resources.compose_multiplatform
+import csvviewer.composeapp.generated.resources.ic_android_logo
+import csvviewer.composeapp.generated.resources.ic_apple_logo
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import java.awt.FileDialog
@@ -84,7 +93,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 
         Scaffold {
             LaunchedEffect(Unit) {
-                println("==LaunchedEffect==")
+//                println("==LaunchedEffect==")
 
                 val logCSVParser = LogCSVParser("C:\\projects\\kmp\\CSVViewer\\logs.csv")
                 records = logCSVParser.parse()
@@ -108,7 +117,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 }
 
                 Row {
-                    Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.5f)) {
+                    Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.3f)) {
                         CsvDataGrid(records.filter {
                             it.idTracking.contains(filterText, ignoreCase = true) ||
                                     it.bodyResponse.contains(filterText, ignoreCase = true) ||
@@ -133,6 +142,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         Text("Request JSON [${currentItem.dateRequest}]")
                         JsonTree(
                             json = currentItem.bodyRequest,
+                            initialState = TreeState.EXPANDED,
                             onLoading = { Text(text = "Loading...") },
                             onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
@@ -143,6 +153,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         Text("Response JSON [${currentItem.dateResponse}]")
                         JsonTree(
                             json = currentItem.bodyResponse,
+                            initialState = TreeState.EXPANDED,
                             onLoading = { Text(text = "Loading...") },
                             onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
@@ -164,7 +175,7 @@ fun CsvHeaderRow() {
         Text("Body Request", Modifier.weight(1f))
         Text("Body Response", Modifier.weight(1f))
         Text("Enterprise Code", Modifier.weight(1f))
-        Text("Platform", Modifier.weight(1f))
+        Text("OS", Modifier.width(50.dp))
         Text("ID Tracking", Modifier.weight(1f))
     }
 }
@@ -176,10 +187,11 @@ fun CsvRecordRow(index: Int, record: CsvRecord, onClick: (CsvRecord) -> Unit = {
 
     Row(modifier = Modifier
         .fillMaxWidth()
+        .height(40.dp)
         .padding(8.dp)
         .focusRequester(focusRequester)
         .onFocusChanged { state ->
-            println("onFocusChanged => it.isFocused: ${state.isFocused}")
+//            println("onFocusChanged => it.isFocused: ${state.isFocused}")
             isFocused = state.isFocused
             if (state.isFocused) {
                 onClick(record)
@@ -210,7 +222,21 @@ fun CsvRecordRow(index: Int, record: CsvRecord, onClick: (CsvRecord) -> Unit = {
         Text(record.bodyRequest, Modifier.weight(1f))
         Text(record.bodyResponse, Modifier.weight(1f))
         Text(record.enterpriseCode, Modifier.weight(1f))
-        Text(record.platform, Modifier.weight(1f))
+//        Text(record.platform, Modifier.weight(1f))
+        Box(
+            modifier = Modifier
+                .width(50.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (record.platform == "android") Res.drawable.ic_android_logo else if (record.platform == "ios") Res.drawable.ic_apple_logo else Res.drawable.compose_multiplatform
+                ),
+                tint = Color.White,
+                contentDescription = "platform icon",
+            )
+        }
+
         Text(record.idTracking, Modifier.weight(1f))
     }
 }
