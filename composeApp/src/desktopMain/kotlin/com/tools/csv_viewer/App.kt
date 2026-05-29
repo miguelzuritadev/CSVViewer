@@ -19,51 +19,28 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.tools.csv_viewer.csv.CsvDataGrid
 import com.tools.csv_viewer.csv.CsvItemDetails
+import com.tools.csv_viewer.theme.AppTheme
 import csvviewer.composeapp.generated.resources.Res
 import csvviewer.composeapp.generated.resources.ic_arrow_drop_down
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
-private val DarkColorPalette = darkColors(
-    primary = Color(0xFFBB86FC),
-    primaryVariant = Color(0xFF3700B3),
-    secondary = Color(0xFF03DAC6),
-    onSurface = Color.White // Default color for Text in dark theme
-)
-
-private val LightColorPalette = lightColors(
-    primary = Color(0xFF6200EE),
-    primaryVariant = Color(0xFF3700B3),
-    secondary = Color(0xFF03DAC6),
-    onSurface = Color.Black // Default color for Text in light theme
-)
-
-
 @Composable
 @Preview
 fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
-
     val filterOptions = listOf("All", "android", "ios", "web")
     var selectedFilter by remember { mutableStateOf("All") }
 
-    MaterialTheme(colors = colors) {
+    AppTheme(darkTheme = darkTheme) {
         var showContent by remember { mutableStateOf(false) }
         var records by remember { mutableStateOf(emptyList<CsvRecord>()) }
         var filterText by remember { mutableStateOf("") }
@@ -77,7 +54,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                 records = logCSVParser.parse()
             }
             Column(
-                Modifier.fillMaxSize().background(colors.background), horizontalAlignment = Alignment.CenterHorizontally
+                Modifier.fillMaxSize().background(MaterialTheme.colors.background), horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(onClick = {
                     showContent = !showContent
