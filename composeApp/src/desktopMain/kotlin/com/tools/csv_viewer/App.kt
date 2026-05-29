@@ -91,15 +91,13 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
     val filterOptions = listOf("All", "android", "ios", "web")
     var selectedFilter by remember { mutableStateOf("All") }
 
-    var filterURLOptions = arrayListOf("All")
-    var selectedURLFilter by remember { mutableStateOf("All") }
-
-
     MaterialTheme(colors = colors) {
         var showContent by remember { mutableStateOf(false) }
         var records by remember { mutableStateOf(emptyList<CsvRecord>()) }
         var filterText by remember { mutableStateOf("") }
         var currentItem: CsvRecord by remember { mutableStateOf(CsvRecord("", "", "", "", "", "", "", "")) }
+        val filterURLOptions = remember(records) { records.map { it.url }.distinct().toCollection(arrayListOf("All")) }
+        var selectedURLFilter by remember { mutableStateOf("All") }
 
         Scaffold {
             LaunchedEffect(Unit) {
@@ -107,8 +105,6 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 
                 val logCSVParser = LogCSVParser("C:\\projects\\kmp\\CSVViewer\\logs.csv")
                 records = logCSVParser.parse()
-                // Update URL filter options
-                filterURLOptions = records.map { it.url }.distinct().toCollection(arrayListOf("All"))
             }
             Column(
                 Modifier.fillMaxSize().background(colors.background), horizontalAlignment = Alignment.CenterHorizontally
@@ -124,8 +120,6 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                         filePath?.let { path ->
                             val logCSVParser = LogCSVParser(path)
                             records = logCSVParser.parse()
-                            // Update URL filter options
-                            filterURLOptions = records.map { it.url }.distinct().toCollection(arrayListOf("All"))
                         }
                     }
                 }
@@ -204,6 +198,20 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                                     }
                                 }
                             }
+                        }
+                        Button(
+                            onClick = {
+                                selectedFilter = "All"
+                                selectedURLFilter = "All"
+                                filterText = ""
+                                focusManager.moveFocus(FocusDirection.Up)
+                                focusManager.moveFocus(FocusDirection.Up)
+                                focusManager.moveFocus(FocusDirection.Up)
+                                focusManager.moveFocus(FocusDirection.Left)
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(8.dp)
+                        ) {
+                            Text("Reset Filters")
                         }
                     }
                 }
