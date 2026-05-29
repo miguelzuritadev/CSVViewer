@@ -1,4 +1,4 @@
-package com.tools.csv_viewer
+package com.tools.csv_viewer.csv
 
 import CsvRecord
 import androidx.compose.foundation.focusGroup

@@ -1,4 +1,4 @@
-package com.tools.csv_viewer
+package com.tools.csv_viewer.csv
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

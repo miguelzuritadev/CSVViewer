@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.JsonTree
 import com.sebastianneubauer.jsontree.TreeState
+import com.tools.csv_viewer.csv.CsvDataGrid
 import csvviewer.composeapp.generated.resources.Res
 import csvviewer.composeapp.generated.resources.ic_arrow_drop_down
 import org.jetbrains.compose.resources.painterResource
@@ -101,7 +102,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                     Column(modifier = Modifier.weight(0.7f).fillMaxHeight(0.3f)) {
                         CsvDataGrid(records.filter {
                             (selectedFilter == "All" || it.platform == selectedFilter) &&
-                            (selectedURLFilter == "All" || it.url.contains(selectedURLFilter, ignoreCase = true) ) &&
+                                    (selectedURLFilter == "All" || it.url.contains(selectedURLFilter, ignoreCase = true)) &&
                                     (it.idTracking.contains(filterText, ignoreCase = true) ||
                                             it.bodyResponse.contains(filterText, ignoreCase = true) ||
                                             it.bodyRequest.contains(filterText, ignoreCase = true))
