@@ -2,6 +2,8 @@
 
 A Kotlin Multiplatform desktop application providing essential tools for developers, built with Compose Multiplatform.
 
+![Main Menu](screenshots/main_menu.png)
+
 ## Features
 
 ### 1. CSV Viewer
@@ -10,11 +12,15 @@ A Kotlin Multiplatform desktop application providing essential tools for develop
 - View detailed information for each record, including formatted JSON request/response bodies.
 - **New:** Text selection enabled for JSON details.
 
+![CSV Viewer](screenshots/screen_csv.png)
+
 ### 2. JWT Parser
 - Decode and inspect JSON Web Tokens (JWT).
 - View Header and Payload sections in an interactive tree structure.
 - Signature inspection.
 - **New:** Full text selection for all decoded sections.
+
+![JWT Parser](screenshots/screen_jwt.png)
 
 ## Project Structure
 
