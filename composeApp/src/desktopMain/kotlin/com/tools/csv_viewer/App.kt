@@ -146,10 +146,10 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                             modifier = Modifier.fillMaxWidth().padding(8.dp)
                         )
 
-
+                        Text("Filter by Platform", modifier = Modifier.padding(start = 8.dp, top = 8.dp), style = MaterialTheme.typography.caption)
                         var platformExpanded by remember { mutableStateOf(false) }
                         Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                            Button(onClick = { platformExpanded = true }) {
+                            Button(onClick = { platformExpanded = true }, modifier = Modifier.fillMaxWidth()) {
                                 Text(selectedFilter)
                                 Icon(
                                     painter = painterResource(Res.drawable.ic_arrow_drop_down),
@@ -173,9 +173,10 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                             }
                         }
 
+                        Text("Filter by URL", modifier = Modifier.padding(start = 8.dp, top = 8.dp), style = MaterialTheme.typography.caption)
                         var urlExpanded by remember { mutableStateOf(false) }
                         Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                            Button(onClick = { urlExpanded = true }) {
+                            Button(onClick = { urlExpanded = true }, modifier = Modifier.fillMaxWidth()) {
                                 Text(selectedURLFilter)
                                 Icon(
                                     painter = painterResource(Res.drawable.ic_arrow_drop_down),
