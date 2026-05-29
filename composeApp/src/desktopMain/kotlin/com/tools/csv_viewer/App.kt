@@ -28,9 +28,8 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import com.sebastianneubauer.jsontree.JsonTree
-import com.sebastianneubauer.jsontree.TreeState
 import com.tools.csv_viewer.csv.CsvDataGrid
+import com.tools.csv_viewer.csv.CsvItemDetails
 import csvviewer.composeapp.generated.resources.Res
 import csvviewer.composeapp.generated.resources.ic_arrow_drop_down
 import org.jetbrains.compose.resources.painterResource
@@ -74,8 +73,6 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
 
         Scaffold {
             LaunchedEffect(Unit) {
-//                println("==LaunchedEffect==")
-
                 val logCSVParser = LogCSVParser("C:\\projects\\kmp\\CSVViewer\\logs.csv")
                 records = logCSVParser.parse()
             }
@@ -190,30 +187,7 @@ fun App(darkTheme: Boolean = isSystemInDarkTheme()) {
                     }
                 }
 
-                Row {
-                    Column(modifier = Modifier.weight(0.7f)) {
-                        Text("Request JSON [${currentItem.dateRequest}]")
-                        JsonTree(
-                            json = currentItem.bodyRequest,
-                            initialState = TreeState.EXPANDED,
-                            onLoading = { },
-                            onError = { throwable: Throwable ->
-//                                println("Error: ${throwable.message}")
-                            }
-                        )
-                    }
-                    Column(modifier = Modifier.weight(0.3f)) {
-                        Text("Response JSON [${currentItem.dateResponse}]")
-                        JsonTree(
-                            json = currentItem.bodyResponse,
-                            initialState = TreeState.EXPANDED,
-                            onLoading = { },
-                            onError = { throwable: Throwable ->
-//                                println("Error: ${throwable.message}")
-                            }
-                        )
-                    }
-                }
+                CsvItemDetails(currentItem)
             }
         }
     }
