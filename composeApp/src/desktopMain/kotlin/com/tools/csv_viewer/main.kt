@@ -16,9 +16,8 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "CSVViewer",
-//        state = rememberWindowState(size = windowSize, position = WindowPosition.Aligned(Alignment.Center), isMinimized = false)
-//        state = rememberWindowState(placement = WindowPlacement.Maximized),
+        state = rememberWindowState(placement = WindowPlacement.Maximized),
         ) {
-        App()
+        MainScreen()
     }
 }
