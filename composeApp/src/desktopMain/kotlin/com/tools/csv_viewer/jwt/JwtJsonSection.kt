@@ -1,6 +1,7 @@
 package com.tools.csv_viewer.jwt
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -21,12 +22,14 @@ fun JwtJsonSection(
         elevation = 2.dp,
         modifier = modifier.padding(vertical = 8.dp)
     ) {
-        JsonTree(
-            json = json,
-            initialState = TreeState.EXPANDED,
-            modifier = Modifier.padding(8.dp),
-            onLoading = { },
-            onError = { }
-        )
+        SelectionContainer {
+            JsonTree(
+                json = json,
+                initialState = TreeState.EXPANDED,
+                modifier = Modifier.padding(8.dp),
+                onLoading = { },
+                onError = { }
+            )
+        }
     }
 }

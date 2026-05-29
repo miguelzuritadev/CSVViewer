@@ -3,6 +3,7 @@ package com.tools.csv_viewer.csv
 import CsvRecord
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,25 +15,29 @@ fun CsvItemDetails(currentItem: CsvRecord) {
     Row {
         Column(modifier = Modifier.Companion.weight(0.7f)) {
             Text("Request JSON [${currentItem.dateRequest}]")
-            JsonTree(
-                json = currentItem.bodyRequest,
-                initialState = TreeState.EXPANDED,
-                onLoading = { },
-                onError = { throwable: Throwable ->
+            SelectionContainer {
+                JsonTree(
+                    json = currentItem.bodyRequest,
+                    initialState = TreeState.EXPANDED,
+                    onLoading = { },
+                    onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
-                }
-            )
+                    }
+                )
+            }
         }
         Column(modifier = Modifier.Companion.weight(0.3f)) {
             Text("Response JSON [${currentItem.dateResponse}]")
-            JsonTree(
-                json = currentItem.bodyResponse,
-                initialState = TreeState.EXPANDED,
-                onLoading = { },
-                onError = { throwable: Throwable ->
+            SelectionContainer {
+                JsonTree(
+                    json = currentItem.bodyResponse,
+                    initialState = TreeState.EXPANDED,
+                    onLoading = { },
+                    onError = { throwable: Throwable ->
 //                                println("Error: ${throwable.message}")
-                }
-            )
+                    }
+                )
+            }
         }
     }
 }

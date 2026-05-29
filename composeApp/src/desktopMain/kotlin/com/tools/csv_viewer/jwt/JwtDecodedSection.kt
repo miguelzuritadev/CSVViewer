@@ -2,6 +2,7 @@ package com.tools.csv_viewer.jwt
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -47,13 +48,15 @@ fun JwtDecodedSection(
                 elevation = 2.dp,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).weight(0.1f)
             ) {
-                Box(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(
-                        signature,
-                        modifier = Modifier.padding(8.dp),
-                        style = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
-                        color = Color.DarkGray
-                    )
+                SelectionContainer {
+                    Box(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(
+                            signature,
+                            modifier = Modifier.padding(8.dp),
+                            style = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
+                            color = Color.DarkGray
+                        )
+                    }
                 }
             }
         }
