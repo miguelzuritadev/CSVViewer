@@ -1,17 +1,12 @@
 package com.tools.csv_viewer.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.sebastianneubauer.jsontree.JsonTree
-import com.sebastianneubauer.jsontree.TreeState
+import com.tools.csv_viewer.jwt.JwtDecodedSection
+import com.tools.csv_viewer.jwt.JwtInputSection
 import java.util.Base64
 
 @Composable
@@ -55,82 +50,19 @@ fun JwtParserScreen() {
         Text("JWT Parser", style = MaterialTheme.typography.h5, modifier = Modifier.padding(bottom = 16.dp))
 
         Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            // Left Column: JWT Input
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Encoded JWT", style = MaterialTheme.typography.subtitle1)
-                OutlinedTextField(
-                    value = jwtInput,
-                    onValueChange = { jwtInput = it },
-                    modifier = Modifier.fillMaxSize().padding(top = 8.dp),
-                    placeholder = { Text("Paste your JWT here...") },
-                    textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace)
-                )
-            }
-
-            // Right Column: Decoded Output
-            Column(
+            JwtInputSection(
+                jwtInput = jwtInput,
+                onValueChange = { jwtInput = it },
                 modifier = Modifier.weight(1f)
-            ) {
-                if (error != null) {
-                    Text(error!!, color = Color.Red, modifier = Modifier.padding(bottom = 16.dp))
-                }
+            )
 
-                if (headerJson != null) {
-                    Text("Header", style = MaterialTheme.typography.subtitle1)
-                    Surface(
-                        elevation = 2.dp,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).weight(0.3f)
-                    ) {
-                        JsonTree(
-                            json = headerJson!!,
-                            initialState = TreeState.EXPANDED,
-                            modifier = Modifier.padding(8.dp),
-                            onLoading = { },
-                            onError = { }
-                        )
-                    }
-                }
-
-                if (payloadJson != null) {
-                    Text("Payload", style = MaterialTheme.typography.subtitle1, modifier = Modifier.padding(top = 16.dp))
-                    Surface(
-                        elevation = 2.dp,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).weight(0.6f)
-                    ) {
-                        JsonTree(
-                            json = payloadJson!!,
-                            initialState = TreeState.EXPANDED,
-                            modifier = Modifier.padding(8.dp),
-                            onLoading = { },
-                            onError = { }
-                        )
-                    }
-                }
-
-                val signature = jwtInput.trim().split(".").getOrNull(2)
-                if (signature != null) {
-                    Text("Signature", style = MaterialTheme.typography.subtitle1, modifier = Modifier.padding(top = 16.dp))
-                    Surface(
-                        elevation = 2.dp,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).weight(0.1f)
-                    ) {
-                        Box(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                            Text(
-                                signature,
-                                modifier = Modifier.padding(8.dp),
-                                style = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
-                                color = Color.DarkGray
-                            )
-                        }
-                    }
-                }
-
-                if (headerJson == null && payloadJson == null && error == null) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Enter a JWT to see the decoded content", style = MaterialTheme.typography.body2, color = Color.Gray)
-                    }
-                }
-            }
+            JwtDecodedSection(
+                headerJson = headerJson,
+                payloadJson = payloadJson,
+                signature = jwtInput.trim().split(".").getOrNull(2),
+                error = error,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
